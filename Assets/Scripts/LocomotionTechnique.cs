@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Oculus.Interaction.Input;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,7 +66,7 @@ public class LocomotionTechnique : MonoBehaviour
 
         //}
 
-        if (IsFist(leftHand) || IsFist(rightHand))
+        if (IsFist(leftHand, leftHandSkeleton) || IsFist(rightHand, rightHandSkeleton))
         {
             Debug.Log("FIST");
         }
@@ -186,10 +187,30 @@ public class LocomotionTechnique : MonoBehaviour
         }
     }
 
-    //private bool IsFist(OVRHand hand)
-    //{
-    //    return hand.GetFingerPinchStrength(OVRHand.HandFinger.Thumb) > 0.6 && hand.GetFingerPinchStrength(OVRHand.HandFinger.Index) > 0.6 &&
-    //           hand.GetFingerPinchStrength(OVRHand.HandFinger.Middle) > 0.5 && hand.GetFingerPinchStrength(OVRHand.HandFinger.Ring) > 0.3 &&
-    //           hand.GetFingerPinchStrength(OVRHand.HandFinger.Pinky) > 0.2;
-    //}
+    private bool IsFist(OVRHand hand, OVRSkeleton handSkeleton)
+    {
+        OVRBone[] bones = handSkeleton.Bones.ToArray();
+
+        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
+        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
+        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
+        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
+        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
+        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
+        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
+        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
+        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
+        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
+        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
+        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
+        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
+        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
+        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
+        return false;
+    }
+
+    public void Fist()
+    {
+        Debug.Log("Fist");
+    }
 }
