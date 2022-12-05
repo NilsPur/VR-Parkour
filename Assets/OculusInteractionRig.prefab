@@ -160,7 +160,7 @@ MonoBehaviour:
   _cameraRigRef: {fileID: 6737589642889864270}
   _processLateUpdates: 0
   _handedness: 1
-  _trackingToWorldTransformer: {fileID: 1318441877046709866}
+  _trackingToWorldTransformer: {fileID: 0}
   _hmdData: {fileID: 2590973644553116221}
 --- !u!1 &1580031214291411745
 GameObject:
@@ -283,7 +283,7 @@ MonoBehaviour:
   _cameraRigRef: {fileID: 6737589642889864270}
   _processLateUpdates: 0
   _handedness: 1
-  _trackingToWorldTransformer: {fileID: 1318441877046709866}
+  _trackingToWorldTransformer: {fileID: 0}
   _handSkeletonProvider: {fileID: 7494040723047108212}
   _hmdData: {fileID: 2590973644553116221}
 --- !u!114 &3002626977831337729
@@ -425,7 +425,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _hand: {fileID: 4226956446475026770}
-  _trackingToWorldTransformer: {fileID: 1318441877046709866}
+  _trackingToWorldTransformer: {fileID: 0}
   _disableProactiveEvaluation: 0
 --- !u!114 &2077981945086818310
 MonoBehaviour:
@@ -562,7 +562,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _hand: {fileID: 576292717476175851}
-  _trackingToWorldTransformer: {fileID: 1318441877046709866}
+  _trackingToWorldTransformer: {fileID: 0}
   _disableProactiveEvaluation: 0
 --- !u!114 &4634100369093183612
 MonoBehaviour:
@@ -587,7 +587,6 @@ GameObject:
   m_Component:
   - component: {fileID: 3926103052261110759}
   - component: {fileID: 6737589642889864270}
-  - component: {fileID: 1318441877046709866}
   m_Layer: 0
   m_Name: InputOVR
   m_TagString: Untagged
@@ -627,19 +626,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _ovrCameraRig: {fileID: 0}
   _requireOvrHands: 1
---- !u!114 &1318441877046709866
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3668356248654282535}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 998a5646185efb9488265f3a2f35a99a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _cameraRigRef: {fileID: 6737589642889864270}
 --- !u!1 &3889910423352292487
 GameObject:
   m_ObjectHideFlags: 0
@@ -859,7 +845,7 @@ MonoBehaviour:
   _cameraRigRef: {fileID: 6737589642889864270}
   _processLateUpdates: 0
   _useOvrManagerEmulatedPose: 0
-  _trackingToWorldTransformer: {fileID: 1318441877046709866}
+  _trackingToWorldTransformer: {fileID: 0}
 --- !u!1 &5386676040054639168
 GameObject:
   m_ObjectHideFlags: 0
@@ -960,7 +946,7 @@ MonoBehaviour:
   _cameraRigRef: {fileID: 6737589642889864270}
   _processLateUpdates: 0
   _handedness: 0
-  _trackingToWorldTransformer: {fileID: 1318441877046709866}
+  _trackingToWorldTransformer: {fileID: 0}
   _handSkeletonProvider: {fileID: 7494040723047108212}
   _hmdData: {fileID: 2590973644553116221}
 --- !u!114 &5308749989159097885
@@ -1062,7 +1048,7 @@ MonoBehaviour:
   _cameraRigRef: {fileID: 6737589642889864270}
   _processLateUpdates: 0
   _handedness: 0
-  _trackingToWorldTransformer: {fileID: 1318441877046709866}
+  _trackingToWorldTransformer: {fileID: 0}
   _hmdData: {fileID: 2590973644553116221}
 --- !u!1 &7499959770697365073
 GameObject:

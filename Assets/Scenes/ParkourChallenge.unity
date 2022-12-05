@@ -24552,6 +24552,64 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1066090344}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1694462298 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3668356248654282535, guid: 5a7d1597f08805e4183309c0e2092779,
+    type: 3}
+  m_PrefabInstance: {fileID: 2543747882899860454}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1694462301 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6737589642889864270, guid: 5a7d1597f08805e4183309c0e2092779,
+    type: 3}
+  m_PrefabInstance: {fileID: 2543747882899860454}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1694462298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7b47e36715521d4e8a30d2c5b6e83e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1694462302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1694462298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84938ccc9c5100441be8543c9df25fd8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _cameraRigRef: {fileID: 1694462301}
+  _hmdRef: {fileID: 1694462303}
+--- !u!114 &1694462303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1694462298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 484167e684014224c9a8bff92b293c6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _hmd: {fileID: 1981809025}
+--- !u!114 &1694462305
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1694462298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 998a5646185efb9488265f3a2f35a99a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _cameraRigRef: {fileID: 1694462301}
 --- !u!4 &1696592282 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4755125321900414, guid: ad9d3c1bf87264ed8a89c188f2c1018c,
@@ -28122,6 +28180,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6b9fef59fa39f0744ab9d260ec6266d0, type: 3}
+--- !u!114 &1981809025 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2590973644553116221, guid: 5a7d1597f08805e4183309c0e2092779,
+    type: 3}
+  m_PrefabInstance: {fileID: 2543747882899860454}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2606bf2f0c914a7aba4390f29ba2eb6e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &1981864576 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4755125321900414, guid: ad9d3c1bf87264ed8a89c188f2c1018c,
@@ -30436,11 +30506,41 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1004333390683183295, guid: 5a7d1597f08805e4183309c0e2092779,
+        type: 3}
+      propertyPath: _trackingToWorldTransformer
+      value: 
+      objectReference: {fileID: 1694462302}
+    - target: {fileID: 1573652241667520657, guid: 5a7d1597f08805e4183309c0e2092779,
+        type: 3}
+      propertyPath: _trackingToWorldTransformer
+      value: 
+      objectReference: {fileID: 1694462305}
+    - target: {fileID: 1587020445326969878, guid: 5a7d1597f08805e4183309c0e2092779,
+        type: 3}
+      propertyPath: _trackingToWorldTransformer
+      value: 
+      objectReference: {fileID: 1694462302}
+    - target: {fileID: 5547002484853146327, guid: 5a7d1597f08805e4183309c0e2092779,
+        type: 3}
+      propertyPath: _trackingToWorldTransformer
+      value: 
+      objectReference: {fileID: 1694462302}
+    - target: {fileID: 5583132568901104753, guid: 5a7d1597f08805e4183309c0e2092779,
+        type: 3}
+      propertyPath: _trackingToWorldTransformer
+      value: 
+      objectReference: {fileID: 1694462302}
     - target: {fileID: 6737589642889864270, guid: 5a7d1597f08805e4183309c0e2092779,
         type: 3}
       propertyPath: _ovrCameraRig
       value: 
       objectReference: {fileID: 735453282}
+    - target: {fileID: 7747403625753657999, guid: 5a7d1597f08805e4183309c0e2092779,
+        type: 3}
+      propertyPath: _trackingToWorldTransformer
+      value: 
+      objectReference: {fileID: 1694462302}
     - target: {fileID: 7945867447503897046, guid: 5a7d1597f08805e4183309c0e2092779,
         type: 3}
       propertyPath: m_RootOrder
@@ -30501,6 +30601,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: OculusInteractionRig
       objectReference: {fileID: 0}
+    - target: {fileID: 9170092485532465914, guid: 5a7d1597f08805e4183309c0e2092779,
+        type: 3}
+      propertyPath: _trackingToWorldTransformer
+      value: 
+      objectReference: {fileID: 1694462302}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5a7d1597f08805e4183309c0e2092779, type: 3}
 --- !u!114 &2644266179382359053 stripped
