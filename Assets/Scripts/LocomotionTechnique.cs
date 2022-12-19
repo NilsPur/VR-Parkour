@@ -1,4 +1,5 @@
-﻿using Oculus.Interaction.Input;
+﻿using Oculus.Interaction;
+using Oculus.Interaction.Input;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,15 +12,18 @@ using UnityEngine.Rendering;
 [RequireComponent(typeof(AudioSource))]
 public class LocomotionTechnique : MonoBehaviour
 {
+    [SerializeField] HandVisual leftHandVisual;
+    [SerializeField] HandVisual rightHandVisual;
+
     // Please implement your locomotion technique in this script. 
     public OVRInput.Controller leftController;
     public OVRInput.Controller rightController;
     [Range(0, 10)] public float translationGain = 0.5f;
-    public GameObject hmd;
-    [SerializeField] private OVRHand leftHand;
-    [SerializeField] private OVRSkeleton leftHandSkeleton;
-    [SerializeField] private OVRHand rightHand;
-    [SerializeField] private OVRSkeleton rightHandSkeleton;
+    [SerializeField] private Hmd hmd;
+    [SerializeField] private Hand leftHand;
+    private HandSkeleton leftHandSkeleton;
+    [SerializeField] private Hand rightHand;
+    private HandSkeleton rightHandSkeleton;
     [SerializeField] private float leftTriggerValue;
     [SerializeField] private float rightTriggerValue;
     [SerializeField] private Vector3 startPos;
@@ -43,33 +47,28 @@ public class LocomotionTechnique : MonoBehaviour
         //Debug.Log("L-hand scale: " + leftHand.HandScale);
         //Debug.Log("R-hand scale: " + rightHand.HandScale);
 
-        OVRBone[] leftHandBones = leftHandSkeleton.Bones.ToArray();
-        OVRBone[] rightHandBones = rightHandSkeleton.Bones.ToArray();
+        //OVRBone[] leftHandBones = leftHandSkeleton.Bones.ToArray();
+        //OVRBone[] rightHandBones = rightHandSkeleton.Bones.ToArray();
 
-        Debug.Log("L-hand Bones (Local): " + string.Join<Vector3>(", ", Array.ConvertAll(leftHandBones, bone => bone.Transform.localPosition)));
-        Debug.Log("R-hand Bones (Local): " + string.Join<Vector3>(", ", Array.ConvertAll(rightHandBones, bone => bone.Transform.localPosition)));
+        //Debug.Log("L-hand Bones (Local): " + string.Join<Vector3>(", ", Array.ConvertAll(leftHandBones, bone => bone.Transform.localPosition)));
+        //Debug.Log("R-hand Bones (Local): " + string.Join<Vector3>(", ", Array.ConvertAll(rightHandBones, bone => bone.Transform.localPosition)));
 
-        Debug.Log("L-hand Bones (Global): " + string.Join<Vector3>(", ", Array.ConvertAll(leftHandBones, bone => bone.Transform.position)));
-        Debug.Log("R-hand Bones (Global): " + string.Join<Vector3>(", ", Array.ConvertAll(rightHandBones, bone => bone.Transform.position)));
+        //Debug.Log("L-hand Bones (Global): " + string.Join<Vector3>(", ", Array.ConvertAll(leftHandBones, bone => bone.Transform.position)));
+        //Debug.Log("R-hand Bones (Global): " + string.Join<Vector3>(", ", Array.ConvertAll(rightHandBones, bone => bone.Transform.position)));
 
-        Debug.Log("L-hand Bones (Rotation): " + string.Join<Quaternion>(", ", Array.ConvertAll(leftHandBones, bone => bone.Transform.localRotation)));
-        Debug.Log("R-hand Bones (Rotation): " + string.Join<Quaternion>(", ", Array.ConvertAll(rightHandBones, bone => bone.Transform.localRotation)));
+        //Debug.Log("L-hand Bones (Rotation): " + string.Join<Quaternion>(", ", Array.ConvertAll(leftHandBones, bone => bone.Transform.localRotation)));
+        //Debug.Log("R-hand Bones (Rotation): " + string.Join<Quaternion>(", ", Array.ConvertAll(rightHandBones, bone => bone.Transform.localRotation)));
 
-        Debug.Log("L-hand:");
-        PrintPinch(leftHand);
-        Debug.Log("R-hand:");
-        PrintPinch(rightHand);
+        //Debug.Log("L-hand:");
+        //PrintPinch(leftHand);
+        //Debug.Log("R-hand:");
+        //PrintPinch(rightHand);
 
         //Debug.Log("Active Controller: " + OVRInput.GetActiveController());
         //if (OVRInput.GetActiveController() != OVRInput.Controller.None)
         //{
 
         //}
-
-        if (IsFist(leftHand, leftHandSkeleton) || IsFist(rightHand, rightHandSkeleton))
-        {
-            Debug.Log("FIST");
-        }
 
         //Debug.Log("Connected Controller: " + OVRInput.GetConnectedControllers());
 
@@ -187,30 +186,44 @@ public class LocomotionTechnique : MonoBehaviour
         }
     }
 
-    private bool IsFist(OVRHand hand, OVRSkeleton handSkeleton)
+    public void ThumpsUp()
     {
-        OVRBone[] bones = handSkeleton.Bones.ToArray();
-
-        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
-        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
-        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
-        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
-        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
-        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
-        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
-        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
-        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
-        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
-        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
-        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
-        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
-        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
-        //bones[(int)OVRSkeleton.BoneId.Hand_Thumb0].Transform.;
-        return false;
+        Debug.Log("ThumpsUp");
+        TeleportToHandPosition();
     }
 
     public void Fist()
     {
         Debug.Log("Fist");
+        TeleportToHandPosition();
+    }
+
+    private void TeleportToHandPosition()
+    {
+        if (rightHand.GetRootPose(out Pose handPose) && hmd.GetRootPose(out Pose hmdPose))
+        {
+            float t = transform.InverseTransformDirection(0, handPose.rotation.eulerAngles.y - 90, 0).y;
+
+            Debug.Log("hand rotation: " + handPose.rotation.eulerAngles);
+            Debug.Log("hmd rotation: " + hmdPose.rotation.eulerAngles);
+            Debug.Log("camera rig rotation: " + transform.rotation.eulerAngles);
+
+            float armRotation = Quaternion.LookRotation(handPose.position - hmd.transform.position, Vector3.up).eulerAngles.y - hmdPose.rotation.eulerAngles.y;
+            float handRotation = handPose.rotation.eulerAngles.y - 90 - armRotation;
+            float newRigRotation = (720 + hmdPose.rotation.eulerAngles.y + (handPose.rotation.eulerAngles.y - 90 - armRotation) - transform.rotation.eulerAngles.y) % 360;
+
+            Debug.Assert(t == newRigRotation);
+
+            Debug.Log("arm rotation: " + armRotation);
+            Debug.Log("new camera rig rotation: " + newRigRotation);
+
+            Vector3 newPosition = new Vector3(handPose.position.x, transform.position.y, handPose.position.z);
+            Quaternion newOrientation = Quaternion.Euler(transform.rotation.eulerAngles.x, newRigRotation, transform.rotation.eulerAngles.z);
+            transform.SetPositionAndRotation(newPosition, newOrientation);
+        }
+        else
+        {
+            Debug.Log("Positioning failed");
+        }
     }
 }
