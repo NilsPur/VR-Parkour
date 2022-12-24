@@ -36,10 +36,16 @@ public class LocomotionTechnique : MonoBehaviour
     public ParkourCounter parkourCounter;
     public string stage;
     public SelectionTaskMeasure selectionTaskMeasure;
+    public Hand[] hands = new Hand[2];
+
+    bool[] teleportationStarted = new bool[2];
+    Pose[] startTeleportationPose = new Pose[2];
 
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
+        hands[0] = leftHand;
+        hands[1] = rightHand;
     }
 
     void Update()
@@ -71,79 +77,103 @@ public class LocomotionTechnique : MonoBehaviour
         //}
 
         //Debug.Log("Connected Controller: " + OVRInput.GetConnectedControllers());
-
-        switch (OVRInput.GetActiveController())
+        
+		for (int i = 0; i < hands.Length; i++)
         {
-            case OVRInput.Controller.LTouch:
-            case OVRInput.Controller.RTouch:
-            case OVRInput.Controller.Touch:
-                break;
-
-            case OVRInput.Controller.Hands:
-            case OVRInput.Controller.RHand:
-            case OVRInput.Controller.LHand:
-                break;
-        }
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-        // Please implement your LOCOMOTION TECHNIQUE in this script :D.
-        leftTriggerValue = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, leftController);
-        rightTriggerValue = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, rightController);
-
-        if (leftTriggerValue > 0.95f && rightTriggerValue > 0.95f)
-        {
-            if (!isIndexTriggerDown)
+			if (hands[i].GetFingerIsPinching(HandFinger.Index))
+			{
+                if (!teleportationStarted[i])
+                {
+                    hands[i].GetRootPose(out Pose handPose);
+                    startTeleportationPose[i] = handPose;
+                    teleportationStarted[i] = true;
+				}
+			}
+            else
             {
-                isIndexTriggerDown = true;
-                startPos = (OVRInput.GetLocalControllerPosition(leftController) + OVRInput.GetLocalControllerPosition(rightController)) / 2;
+                if (teleportationStarted[i])
+                {
+                    TeleportToHandPosition(hands[i], startTeleportationPose[i]);
+                    hands[i].GetRootPose(out Pose handPose);
+                    Vector3 offset = startTeleportationPose[i].position - handPose.position;
+                    
+                    teleportationStarted[i] = false;
+                }
             }
-            offset = hmd.transform.forward.normalized *
-                    ((OVRInput.GetLocalControllerPosition(leftController) - startPos) +
-                     (OVRInput.GetLocalControllerPosition(rightController) - startPos)).magnitude;
-            Debug.DrawRay(startPos, offset, Color.red, 0.2f);
-        }
-        else if (leftTriggerValue > 0.95f && rightTriggerValue < 0.95f)
-        {
-            if (!isIndexTriggerDown)
-            {
-                isIndexTriggerDown = true;
-                startPos = OVRInput.GetLocalControllerPosition(leftController);
-            }
-            offset = hmd.transform.forward.normalized *
-                     (OVRInput.GetLocalControllerPosition(leftController) - startPos).magnitude;
-            Debug.DrawRay(startPos, offset, Color.red, 0.2f);
-        }
-        else if (leftTriggerValue < 0.95f && rightTriggerValue > 0.95f)
-        {
-            if (!isIndexTriggerDown)
-            {
-                isIndexTriggerDown = true;
-                startPos = OVRInput.GetLocalControllerPosition(rightController);
-            }
-            offset = hmd.transform.forward.normalized *
-                     (OVRInput.GetLocalControllerPosition(rightController) - startPos).magnitude;
-            Debug.DrawRay(startPos, offset, Color.red, 0.2f);
-        }
-        else
-        {
-            if (isIndexTriggerDown)
-            {
-                isIndexTriggerDown = false;
-                offset = Vector3.zero;
-            }
-        }
-        this.transform.position = this.transform.position + (offset) * translationGain;
+		}
+        
+        //switch (OVRInput.GetActiveController())
+        //{
+        //    case OVRInput.Controller.LTouch:
+        //    case OVRInput.Controller.RTouch:
+        //    case OVRInput.Controller.Touch:
+        //        break;
+
+        //    case OVRInput.Controller.Hands:
+        //    case OVRInput.Controller.RHand:
+        //    case OVRInput.Controller.LHand:
+        //        break;
+        //}
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////
+        //// Please implement your LOCOMOTION TECHNIQUE in this script :D.
+        //leftTriggerValue = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, leftController);
+        //rightTriggerValue = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, rightController);
+
+        //if (leftTriggerValue > 0.95f && rightTriggerValue > 0.95f)
+        //{
+        //    if (!isIndexTriggerDown)
+        //    {
+        //        isIndexTriggerDown = true;
+        //        startPos = (OVRInput.GetLocalControllerPosition(leftController) + OVRInput.GetLocalControllerPosition(rightController)) / 2;
+        //    }
+        //    offset = hmd.transform.forward.normalized *
+        //            ((OVRInput.GetLocalControllerPosition(leftController) - startPos) +
+        //             (OVRInput.GetLocalControllerPosition(rightController) - startPos)).magnitude;
+        //    Debug.DrawRay(startPos, offset, Color.red, 0.2f);
+        //}
+        //else if (leftTriggerValue > 0.95f && rightTriggerValue < 0.95f)
+        //{
+        //    if (!isIndexTriggerDown)
+        //    {
+        //        isIndexTriggerDown = true;
+        //        startPos = OVRInput.GetLocalControllerPosition(leftController);
+        //    }
+        //    offset = hmd.transform.forward.normalized *
+        //             (OVRInput.GetLocalControllerPosition(leftController) - startPos).magnitude;
+        //    Debug.DrawRay(startPos, offset, Color.red, 0.2f);
+        //}
+        //else if (leftTriggerValue < 0.95f && rightTriggerValue > 0.95f)
+        //{
+        //    if (!isIndexTriggerDown)
+        //    {
+        //        isIndexTriggerDown = true;
+        //        startPos = OVRInput.GetLocalControllerPosition(rightController);
+        //    }
+        //    offset = hmd.transform.forward.normalized *
+        //             (OVRInput.GetLocalControllerPosition(rightController) - startPos).magnitude;
+        //    Debug.DrawRay(startPos, offset, Color.red, 0.2f);
+        //}
+        //else
+        //{
+        //    if (isIndexTriggerDown)
+        //    {
+        //        isIndexTriggerDown = false;
+        //        offset = Vector3.zero;
+        //    }
+        //}
+        //this.transform.position = this.transform.position + (offset) * translationGain;
 
 
-        ////////////////////////////////////////////////////////////////////////////////
-        // These are for the game mechanism.
-        if (OVRInput.Get(OVRInput.Button.Two) || OVRInput.Get(OVRInput.Button.Four))
-        {
-            if (parkourCounter.parkourStart)
-            {
-                this.transform.position = parkourCounter.currentRespawnPos;
-            }
-        }
+        //////////////////////////////////////////////////////////////////////////////////
+        //// These are for the game mechanism.
+        //if (OVRInput.Get(OVRInput.Button.Two) || OVRInput.Get(OVRInput.Button.Four))
+        //{
+        //    if (parkourCounter.parkourStart)
+        //    {
+        //        this.transform.position = parkourCounter.currentRespawnPos;
+        //    }
+        //}
     }
 
     void OnTriggerEnter(Collider other)
@@ -186,21 +216,21 @@ public class LocomotionTechnique : MonoBehaviour
         }
     }
 
-    public void ThumpsUp()
-    {
-        Debug.Log("ThumpsUp");
-        TeleportToHandPosition();
-    }
+    //public void ThumpsUp()
+    //{
+    //    Debug.Log("ThumpsUp");
+    //    TeleportToHandPosition(rightHand);
+    //}
 
-    public void Fist()
-    {
-        Debug.Log("Fist");
-        TeleportToHandPosition();
-    }
+    //public void Fist()
+    //{
+    //    Debug.Log("Fist");
+    //    TeleportToHandPosition(rightHand);
+    //}
 
-    private void TeleportToHandPosition()
+    private void TeleportToHandPosition(Hand hand, Pose startHandPose)
     {
-        if (rightHand.GetRootPose(out Pose handPose) && hmd.GetRootPose(out Pose hmdPose))
+        if (hand.GetRootPose(out Pose handPose) && hmd.GetRootPose(out Pose hmdPose))
         {
             float t = transform.InverseTransformDirection(0, handPose.rotation.eulerAngles.y - 90, 0).y;
 
