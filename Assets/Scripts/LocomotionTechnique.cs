@@ -1,13 +1,7 @@
 ﻿using Oculus.Interaction;
 using Oculus.Interaction.Input;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 [RequireComponent(typeof(AudioSource))]
 public class LocomotionTechnique : MonoBehaviour
@@ -178,14 +172,8 @@ public class LocomotionTechnique : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-
         // These are for the game mechanism.
-        if (other.CompareTag("banner"))
-        {
-            stage = other.gameObject.name;
-            parkourCounter.isStageChange = true;
-        }
-        else if (other.CompareTag("objectInteractionTask"))
+        if (other.CompareTag("objectInteractionTask"))
         {
             selectionTaskMeasure.isTaskStart = true;
             selectionTaskMeasure.scoreText.text = "";
@@ -197,6 +185,11 @@ public class LocomotionTechnique : MonoBehaviour
             selectionTaskMeasure.taskUI.transform.LookAt(tmpTarget);
             selectionTaskMeasure.taskUI.transform.Rotate(new Vector3(0, 180f, 0));
             selectionTaskMeasure.taskStartPanel.SetActive(true);
+        }
+        else if (other.CompareTag("banner"))
+        {
+            stage = other.gameObject.name;
+            parkourCounter.isStageChange = true;
         }
         else if (other.CompareTag("coin"))
         {
@@ -228,27 +221,53 @@ public class LocomotionTechnique : MonoBehaviour
     //    TeleportToHandPosition(rightHand);
     //}
 
+    private RaycastHit[] hits = new RaycastHit[20];
+
     private void TeleportToHandPosition(Hand hand, Pose startHandPose)
     {
         if (hand.GetRootPose(out Pose handPose) && hmd.GetRootPose(out Pose hmdPose))
         {
-            float t = transform.InverseTransformDirection(0, handPose.rotation.eulerAngles.y - 90, 0).y;
+            float newRigRotation = (360 + transform.InverseTransformDirection(0, handPose.rotation.eulerAngles.y, 0).y - 90 - hmdPose.rotation.eulerAngles.y) % 360;
+            Debug.LogWarning("hand rotation: " + handPose.rotation.eulerAngles);
+            Debug.LogWarning("hmd rotation: " + hmdPose.rotation.eulerAngles);
+            Debug.LogWarning("camera rig rotation: " + transform.rotation.eulerAngles);
 
-            Debug.Log("hand rotation: " + handPose.rotation.eulerAngles);
-            Debug.Log("hmd rotation: " + hmdPose.rotation.eulerAngles);
-            Debug.Log("camera rig rotation: " + transform.rotation.eulerAngles);
+            //float armRotation = Quaternion.LookRotation(handPose.position - hmdPose.transform.position, Vector3.up).eulerAngles.y - hmdPose.rotation.eulerAngles.y;
+            //float handRotation = transform.InverseTransformDirection(0, handPose.rotation.eulerAngles.y, 0).y - 90 - armRotation;
+            //float newRigRotation = (720 + hmdPose.rotation.eulerAngles.y + handRotation) % 360;
+            //Debug.Assert(t == newRigRotation);
 
-            float armRotation = Quaternion.LookRotation(handPose.position - hmd.transform.position, Vector3.up).eulerAngles.y - hmdPose.rotation.eulerAngles.y;
-            float handRotation = handPose.rotation.eulerAngles.y - 90 - armRotation;
-            float newRigRotation = (720 + hmdPose.rotation.eulerAngles.y + (handPose.rotation.eulerAngles.y - 90 - armRotation) - transform.rotation.eulerAngles.y) % 360;
-
-            Debug.Assert(t == newRigRotation);
-
-            Debug.Log("arm rotation: " + armRotation);
-            Debug.Log("new camera rig rotation: " + newRigRotation);
+            //Debug.Log("arm rotation: " + armRotation);
+            Debug.LogWarning("new camera rig rotation: " + newRigRotation);
 
             Vector3 newPosition = new Vector3(handPose.position.x, transform.position.y, handPose.position.z);
             Quaternion newOrientation = Quaternion.Euler(transform.rotation.eulerAngles.x, newRigRotation, transform.rotation.eulerAngles.z);
+            Vector3 direction = newPosition - transform.position;
+
+            bool coinHit = false;
+            Vector3 origin = transform.position + new Vector3(0, 1.5f, 0); // add some height so the ray is able to hit coins
+            int hitCount = Physics.RaycastNonAlloc(origin, direction, hits, direction.magnitude, LayerMask.GetMask("locomotion"));
+            for (int i = 0; i < hitCount; i++)
+            {
+                GameObject hitObject = hits[i].collider.gameObject;
+
+                if (hitObject.CompareTag("coin"))
+                {
+                    parkourCounter.coinCount += 1;
+                    hitObject.SetActive(false);
+                    coinHit = true;
+                }
+                else if (hitObject.CompareTag("banner"))
+                {
+                    stage = hitObject.gameObject.name;
+                    parkourCounter.isStageChange = true;
+                }
+            }
+            if (coinHit)
+            {
+                audioSource.Play();
+            }
+
             transform.SetPositionAndRotation(newPosition, newOrientation);
         }
         else

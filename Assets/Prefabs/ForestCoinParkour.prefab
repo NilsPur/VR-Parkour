@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 3942613375915263889}
   - component: {fileID: 3942613375914493873}
   - component: {fileID: 3942613375913493873}
-  - component: {fileID: 3942613375915400479}
   - component: {fileID: 3942613375915400476}
   - component: {fileID: 7289187803586605874}
+  - component: {fileID: 1923922195616336475}
   m_Layer: 6
   m_Name: ForestCoinParkour
   m_TagString: coin
@@ -86,19 +86,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &3942613375915400479
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3942613375915498417}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.9800072, y: 1.0654036, z: 0.2400002}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &3942613375915400476
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124,3 +111,16 @@ Halo:
     serializedVersion: 2
     rgba: 4284807167
   m_Size: -1.5
+--- !u!135 &1923922195616336475
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3942613375915498417}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5327018
+  m_Center: {x: 0, y: 0, z: 0}

@@ -29,11 +29,6 @@ public class ExtendedTrackingToWorldTransformer : MonoBehaviour, ITrackingToWorl
 
     public Quaternion WorldToTrackingWristJointFixup => FromOVRHandDataSource.WristFixupRotation;
 
-    private bool teleportationHappend = false;
-    private Vector3 oldHmdPosition;
-    private Quaternion oldHmdOrientation;
-    private Pose oldHandPose;
-
     const int k = 100;
 
     /// <summary>
