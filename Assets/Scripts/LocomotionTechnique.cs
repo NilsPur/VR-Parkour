@@ -1,6 +1,7 @@
 ﻿using Oculus.Interaction;
 using Oculus.Interaction.Input;
 using System;
+using UnityEditor;
 using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
@@ -30,10 +31,10 @@ public class LocomotionTechnique : MonoBehaviour
     public ParkourCounter parkourCounter;
     public string stage;
     public SelectionTaskMeasure selectionTaskMeasure;
-    public Hand[] hands = new Hand[2];
+    private Hand[] hands = new Hand[2];
 
-    bool[] teleportationStarted = new bool[2];
-    Pose[] startTeleportationPose = new Pose[2];
+    public bool[] TeleportationStarted { get; set; } = new bool[2];
+    public Pose[] StartTeleportationPose { get; set; } = new Pose[2];
 
     void Start()
     {
@@ -76,22 +77,22 @@ public class LocomotionTechnique : MonoBehaviour
         {
 			if (hands[i].GetFingerIsPinching(HandFinger.Index))
 			{
-                if (!teleportationStarted[i])
+                if (!TeleportationStarted[i])
                 {
                     hands[i].GetRootPose(out Pose handPose);
-                    startTeleportationPose[i] = handPose;
-                    teleportationStarted[i] = true;
+                    StartTeleportationPose[i] = handPose;
+                    TeleportationStarted[i] = true;
 				}
 			}
             else
             {
-                if (teleportationStarted[i])
+                if (TeleportationStarted[i])
                 {
-                    TeleportToHandPosition(hands[i], startTeleportationPose[i]);
+                    TeleportToHandPosition(hands[i], StartTeleportationPose[i]);
                     hands[i].GetRootPose(out Pose handPose);
-                    Vector3 offset = startTeleportationPose[i].position - handPose.position;
-                    
-                    teleportationStarted[i] = false;
+                    Vector3 offset = StartTeleportationPose[i].position - handPose.position;
+
+                    TeleportationStarted[i] = false;
                 }
             }
 		}
@@ -222,6 +223,7 @@ public class LocomotionTechnique : MonoBehaviour
     //}
 
     private RaycastHit[] hits = new RaycastHit[20];
+    const int rayY = 200;
 
     private void TeleportToHandPosition(Hand hand, Pose startHandPose)
     {
@@ -240,7 +242,13 @@ public class LocomotionTechnique : MonoBehaviour
             //Debug.Log("arm rotation: " + armRotation);
             Debug.LogWarning("new camera rig rotation: " + newRigRotation);
 
-            Vector3 newPosition = new Vector3(handPose.position.x, transform.position.y, handPose.position.z);
+            float newY = transform.position.y;
+            if (Physics.Raycast(handPose.position + rayY * Vector3.up, Vector3.down, out RaycastHit hit, 2 * rayY, LayerMask.GetMask("Terrain")))
+            {
+                newY = hit.point.y;
+            }
+
+            Vector3 newPosition = new Vector3(handPose.position.x, newY, handPose.position.z);
             Quaternion newOrientation = Quaternion.Euler(transform.rotation.eulerAngles.x, newRigRotation, transform.rotation.eulerAngles.z);
             Vector3 direction = newPosition - transform.position;
 
@@ -253,7 +261,7 @@ public class LocomotionTechnique : MonoBehaviour
 
                 if (hitObject.CompareTag("coin"))
                 {
-                    parkourCounter.coinCount += 1;
+                    parkourCounter.coinCount++;
                     hitObject.SetActive(false);
                     coinHit = true;
                 }

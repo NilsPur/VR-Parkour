@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.PlayerLoop;
 using Pose = UnityEngine.Pose;
 
 public class ExtendedTrackingToWorldTransformer : MonoBehaviour, ITrackingToWorldTransformer
@@ -29,7 +30,10 @@ public class ExtendedTrackingToWorldTransformer : MonoBehaviour, ITrackingToWorl
 
     public Quaternion WorldToTrackingWristJointFixup => FromOVRHandDataSource.WristFixupRotation;
 
-    const int k = 100;
+    const int k = 10;
+    const int a = 2;
+
+    const int rayY = 200;
 
     /// <summary>
     /// Converts a tracking space pose to a world space pose (Applies any transform applied to the OVRCameraRig)
@@ -40,10 +44,23 @@ public class ExtendedTrackingToWorldTransformer : MonoBehaviour, ITrackingToWorl
         Transform trackingToWorldSpace = Transform;
         float xOffset = pose.position.x - trackingToWorldSpace.InverseTransformPoint(rootPose.position).x;
         float zOffset = pose.position.z - trackingToWorldSpace.InverseTransformPoint(rootPose.position).z;
-        float newX = (xOffset > 0 ? 1 : (-1)) * Mathf.Pow(xOffset * k, 2) / k + pose.position.x;
-        float newZ = (zOffset > 0 ? 1 : (-1)) * Mathf.Pow(zOffset * k, 2) / k + pose.position.z;
-        pose.position = trackingToWorldSpace.TransformPoint(new Vector3(newX, pose.position.y, newZ));
+        float newX = (xOffset > 0 ? 1 : (-1)) * a * Mathf.Pow(xOffset * k, 2) + pose.position.x;
+        float newZ = (zOffset > 0 ? 1 : (-1)) * a * Mathf.Pow(zOffset * k, 2) + pose.position.z;
+
+        // get surface height;
+        float newY = pose.position.y;
+        if (Physics.Raycast(trackingToWorldSpace.TransformPoint(new Vector3(newX, rayY, newZ)), Vector3.down, out RaycastHit hit, 2 * rayY, LayerMask.GetMask("Terrain")))
+        {
+            newY += hit.point.y - trackingToWorldSpace.position.y;
+            //if (hit.collider.gameObject.name == "tile-mainroad-hill")
+            //{
+            //    Debug.LogWarning("yPosition hand: " + newY);
+            //}
+        }  
+
+        pose.position = trackingToWorldSpace.TransformPoint(new Vector3(newX, newY, newZ));
         pose.rotation = trackingToWorldSpace.rotation * pose.rotation;
+
         return pose;
     }
 
