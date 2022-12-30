@@ -61,8 +61,8 @@ public class SelectionTaskMeasure : MonoBehaviour
         taskTime = 0f;
         taskStartPanel.SetActive(false);
         donePanel.SetActive(true);
-        objectTStartingPos = taskUI.transform.position + taskUI.transform.forward * 0.5f + taskUI.transform.up * 0.75f;
-        targetTStartingPos = taskUI.transform.position + taskUI.transform.forward * 0.75f + taskUI.transform.up * 1.2f;
+        objectTStartingPos = taskUI.transform.position + taskUI.transform.forward * 5f + taskUI.transform.up * 0.75f; //+ taskUI.transform.forward * 0.5f + taskUI.transform.up * 0.75f;
+        targetTStartingPos = taskUI.transform.position + taskUI.transform.right * 5f + taskUI.transform.up * 1.2f;
         objectT = Instantiate(objectTPrefab, objectTStartingPos, new Quaternion(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f)));
         targerT = Instantiate(targerTPrefab, targetTStartingPos, new Quaternion(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f)));
     }

@@ -7,10 +7,11 @@ using UnityEngine;
 [RequireComponent(typeof(AudioSource))]
 public class LocomotionTechnique : MonoBehaviour
 {
+    // Please implement your locomotion technique in this script.
+    [SerializeField] Grabber leftGrabber;
+    [SerializeField] Grabber rightGrabber;
     [SerializeField] HandVisual leftHandVisual;
     [SerializeField] HandVisual rightHandVisual;
-
-    // Please implement your locomotion technique in this script. 
     public OVRInput.Controller leftController;
     public OVRInput.Controller rightController;
     [Range(0, 10)] public float translationGain = 0.5f;
@@ -32,6 +33,7 @@ public class LocomotionTechnique : MonoBehaviour
     public string stage;
     public SelectionTaskMeasure selectionTaskMeasure;
     private Hand[] hands = new Hand[2];
+    private Grabber[] grabbers = new Grabber[2];
 
     public bool[] TeleportationStarted { get; set; } = new bool[2];
     public Pose[] StartTeleportationPose { get; set; } = new Pose[2];
@@ -41,6 +43,8 @@ public class LocomotionTechnique : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         hands[0] = leftHand;
         hands[1] = rightHand;
+        grabbers[0] = leftGrabber;
+        grabbers[1] = rightGrabber;
     }
 
     void Update()
@@ -75,28 +79,53 @@ public class LocomotionTechnique : MonoBehaviour
         
 		for (int i = 0; i < hands.Length; i++)
         {
-			if (hands[i].GetFingerIsPinching(HandFinger.Index))
-			{
-                if (!TeleportationStarted[i])
-                {
-                    hands[i].GetRootPose(out Pose handPose);
-                    StartTeleportationPose[i] = handPose;
-                    TeleportationStarted[i] = true;
-				}
-			}
-            else
+            if (hands[i].IsHighConfidence)
             {
-                if (TeleportationStarted[i])
+                if (hands[i].GetFingerIsPinching(HandFinger.Index))
                 {
-                    TeleportToHandPosition(hands[i], StartTeleportationPose[i]);
-                    hands[i].GetRootPose(out Pose handPose);
-                    Vector3 offset = StartTeleportationPose[i].position - handPose.position;
+                    if (grabbers[(i + 1) % 2].IsGrabbing)
+                    {
+                        if (!grabbers[i].IsRotating)
+                        {
+                            grabbers[i].Rotate(grabbers[(i + 1) % 2].SelectedObject);
+                        }
+                    }
+                    else if (grabbers[i].CanGrab)
+                    {
+                        if (!grabbers[i].IsGrabbing)
+                        {
+                            grabbers[i].Grab();
+                        }
+                    }
+                    else if (!TeleportationStarted[i])
+                    {
+                        hands[i].GetRootPose(out Pose handPose);
+                        StartTeleportationPose[i] = handPose;
+                        TeleportationStarted[i] = true;
+                    }
+                }
+                else
+                {
+                    if (grabbers[i].IsRotating)
+                    {
+                        grabbers[i].ReleaseRotation();
+                    }
+                    else if (grabbers[i].IsGrabbing)
+                    {
+                        grabbers[i].ReleaseGrab();
+                    }
+                    else if (TeleportationStarted[i])
+                    {
+                        TeleportToHandPosition(hands[i], StartTeleportationPose[i]);
+                        hands[i].GetRootPose(out Pose handPose);
+                        Vector3 offset = StartTeleportationPose[i].position - handPose.position;
 
-                    TeleportationStarted[i] = false;
+                        TeleportationStarted[i] = false;
+                    }
                 }
             }
 		}
-        
+
         //switch (OVRInput.GetActiveController())
         //{
         //    case OVRInput.Controller.LTouch:
