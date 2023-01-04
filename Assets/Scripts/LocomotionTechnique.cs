@@ -3,6 +3,7 @@ using Oculus.Interaction.Input;
 using System;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(AudioSource))]
 public class LocomotionTechnique : MonoBehaviour
@@ -32,9 +33,8 @@ public class LocomotionTechnique : MonoBehaviour
     public ParkourCounter parkourCounter;
     public string stage;
     public SelectionTaskMeasure selectionTaskMeasure;
-    private Hand[] hands = new Hand[2];
-    private Grabber[] grabbers = new Grabber[2];
-
+    public Hand[] hands { get; set; } = new Hand[2];
+    public Grabber[] grabbers { get; set; } = new Grabber[2];
     public bool[] TeleportationStarted { get; set; } = new bool[2];
     public Pose[] StartTeleportationPose { get; set; } = new Pose[2];
 
@@ -239,11 +239,10 @@ public class LocomotionTechnique : MonoBehaviour
         }
     }
 
-    //public void ThumpsUp()
-    //{
-    //    Debug.Log("ThumpsUp");
-    //    TeleportToHandPosition(rightHand);
-    //}
+    public void SwitchToCalibrationScene()
+    {
+        SceneManager.LoadScene("Calibration");
+    }
 
     //public void Fist()
     //{

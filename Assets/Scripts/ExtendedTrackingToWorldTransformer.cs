@@ -7,13 +7,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.PlayerLoop;
+using UnityEngine.SceneManagement;
 using Pose = UnityEngine.Pose;
 
 public class ExtendedTrackingToWorldTransformer : MonoBehaviour, ITrackingToWorldTransformer
 {
-    public Vector3 RootOffset = new Vector3();
+    private Vector3 rootOffset = new Vector3();
 
-    public LocomotionTechnique Locomotion;
+    [SerializeField]
+    private LocomotionTechnique locomotion;
+
+    [SerializeField]
+    private Handedness Hand;
 
     [SerializeField]
     private Transform interactionRigTransform;
@@ -31,19 +36,33 @@ public class ExtendedTrackingToWorldTransformer : MonoBehaviour, ITrackingToWorl
     public Quaternion WorldToTrackingWristJointFixup => FromOVRHandDataSource.WristFixupRotation;
 
     const int k = 10;
-    const int a = 2;
+    float a = 2;
 
     const int rayY = 200;
+
+    int handIndex;
 
     /// <summary>
     /// Converts a tracking space pose to a world space pose (Applies any transform applied to the OVRCameraRig)
     /// </summary>
     public Pose ToWorldPose(Pose pose)
     {
-        GetComponent<HmdRef>().GetRootPose(out Pose rootPose);
+        GetComponent<HmdRef>().GetRootPose(out Pose hmdPose);
         Transform trackingToWorldSpace = Transform;
-        float xOffset = pose.position.x - trackingToWorldSpace.InverseTransformPoint(rootPose.position).x;
-        float zOffset = pose.position.z - trackingToWorldSpace.InverseTransformPoint(rootPose.position).z;
+        Quaternion hmdRotationY = Quaternion.Euler(new Vector3(0, hmdPose.rotation.eulerAngles.y, 0));
+        Vector3 rootPosition = trackingToWorldSpace.InverseTransformPoint(hmdPose.position + hmdRotationY * rootOffset);
+        float xOffset = pose.position.x - rootPosition.x;
+        float zOffset = pose.position.z - rootPosition.z;
+
+        if (locomotion.grabbers[handIndex].IsGrabbing)
+        {
+            a = 0.5f;
+        }
+        else
+        {
+            a = 2f;
+        }
+
         float newX = (xOffset > 0 ? 1 : (-1)) * a * Mathf.Pow(xOffset * k, 2) + pose.position.x;
         float newZ = (zOffset > 0 ? 1 : (-1)) * a * Mathf.Pow(zOffset * k, 2) + pose.position.z;
 
@@ -52,10 +71,6 @@ public class ExtendedTrackingToWorldTransformer : MonoBehaviour, ITrackingToWorl
         if (Physics.Raycast(trackingToWorldSpace.TransformPoint(new Vector3(newX, rayY, newZ)), Vector3.down, out RaycastHit hit, 2 * rayY, LayerMask.GetMask("Terrain")))
         {
             newY += hit.point.y - trackingToWorldSpace.position.y;
-            //if (hit.collider.gameObject.name == "tile-mainroad-hill")
-            //{
-            //    Debug.LogWarning("yPosition hand: " + newY);
-            //}
         }  
 
         pose.position = trackingToWorldSpace.TransformPoint(new Vector3(newX, newY, newZ));
@@ -109,7 +124,22 @@ public class ExtendedTrackingToWorldTransformer : MonoBehaviour, ITrackingToWorl
     protected virtual void Start()
     {
         Assert.IsNotNull(CameraRigRef);
-        Assert.IsNotNull(Locomotion);
+        Assert.IsNotNull(locomotion);
+        if (!Calibration.IsCalibrated())
+        {
+            SceneManager.LoadScene("Calibration");
+        }
+        switch (Hand)
+        {
+            case Handedness.Left:
+                rootOffset = Calibration.GetLeftHandRootOffset();
+                handIndex = 0;
+                break;
+            case Handedness.Right:
+                rootOffset = Calibration.GetRightHandRootOffset();
+                handIndex = 1;
+                break;
+        }
     }
 
     #region Inject
