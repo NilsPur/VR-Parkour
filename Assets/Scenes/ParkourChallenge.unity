@@ -11339,6 +11339,8 @@ MonoBehaviour:
   startPos: {x: 0, y: 0, z: 0}
   offset: {x: 0, y: 0, z: 0}
   isIndexTriggerDown: 0
+  lineDrawerLeftHand: {fileID: 0}
+  lineDrawerRightHand: {fileID: 91342167}
   parkourCounter: {fileID: 1487194127}
   stage: 
   selectionTaskMeasure: {fileID: 1487194128}
@@ -24924,7 +24926,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84938ccc9c5100441be8543c9df25fd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rootOffset: {x: 0, y: 0, z: 0}
   locomotion: {fileID: 735453283}
   Hand: 0
   interactionRigTransform: {fileID: 1114300997}
@@ -24968,7 +24969,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84938ccc9c5100441be8543c9df25fd8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rootOffset: {x: 0, y: 0, z: 0}
   locomotion: {fileID: 735453283}
   Hand: 1
   interactionRigTransform: {fileID: 1114300997}
