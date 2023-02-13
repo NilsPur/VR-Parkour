@@ -1,14 +1,25 @@
-﻿using Oculus.Interaction;
+﻿using JetBrains.Annotations;
+using Oculus.Interaction;
 using Oculus.Interaction.Input;
 using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using static UnityEngine.UI.Image;
+
+public enum LocomotionType
+{
+    Bow,
+    Teleport
+}
 
 [RequireComponent(typeof(AudioSource))]
 public class LocomotionTechnique : MonoBehaviour
 {
+    public static readonly LocomotionType LocomotionType = LocomotionType.Bow;
+
     // Please implement your locomotion technique in this script.
     [SerializeField] Grabber leftGrabber;
     [SerializeField] Grabber rightGrabber;
@@ -38,6 +49,8 @@ public class LocomotionTechnique : MonoBehaviour
     public Grabber[] grabbers { get; set; } = new Grabber[2];
     public bool[] TeleportationStarted { get; set; } = new bool[2];
 
+    int bowIndex = -1;
+
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
@@ -50,53 +63,123 @@ public class LocomotionTechnique : MonoBehaviour
     }
 
     void Update()
-    {        
+    {       
 		for (int i = 0; i < hands.Length; i++)
         {
             if (hands[i].IsHighConfidence)
             {
                 if (hands[i].GetFingerIsPinching(HandFinger.Index))
                 {
-                    if (grabbers[(i + 1) % 2].IsGrabbing)
+                    if (LocomotionType == LocomotionType.Bow)
                     {
-                        if (!grabbers[i].IsRotating)
+                        TeleportationStarted[i] = true;
+                        // Is the bow now drawn ?
+                        if (TeleportationStarted[(i + 1) % 2])
                         {
-                            grabbers[i].Rotate(grabbers[(i + 1) % 2].SelectedObject);
+                            lineDrawerRightHand.SetDrawArrowTrajectory(true);
+                        }
+                        // This hand is the bow
+                        else
+                        {
+                            bowIndex = i;
                         }
                     }
-                    else if (grabbers[i].CanGrab)
+                    else
                     {
-                        if (!grabbers[i].IsGrabbing)
+                        if (grabbers[(i + 1) % 2].IsGrabbing)
                         {
-                            grabbers[i].Grab();
+                            if (!grabbers[i].IsRotating)
+                            {
+                                grabbers[i].Rotate(grabbers[(i + 1) % 2].SelectedObject);
+                            }
                         }
-                    }
-                    else if (!TeleportationStarted[i])
-                    {
-                        hands[i].GetRootPose(out Pose handPose);
-						lineDrawers[i]?.FixateEndPoint(handPose.position);
-						TeleportationStarted[i] = true;
+                        else if (grabbers[i].CanGrab)
+                        {
+                            if (!grabbers[i].IsGrabbing)
+                            {
+                                grabbers[i].Grab();
+                            }
+                        }
+                        else if (!TeleportationStarted[i])
+                        {
+                            hands[i].GetRootPose(out Pose handPose);
+                            lineDrawers[i]?.FixateEndPoint(handPose.position);
+                            TeleportationStarted[i] = true;
+                        }
                     }
                 }
                 else
                 {
-                    if (grabbers[i].IsRotating)
+                    if (LocomotionType == LocomotionType.Bow)
                     {
-                        grabbers[i].ReleaseRotation();
+                        // Bow was drawn
+                        if (TeleportationStarted[i] && TeleportationStarted[(i + 1) % 2])
+                        {
+                            // Was the bow released? -> cancel shot
+                            if (i == bowIndex)
+                            {
+                                TeleportationStarted[i] = false;
+                                // The other hand is now the bow
+                                // bowIndex = (i + 1) % 2;
+                            }
+                            // The bowstring was release -> execute shot
+                            else
+                            {
+                                Teleport(i);
+                            }
+                            lineDrawerRightHand.SetDrawArrowTrajectory(false);
+                        }
                     }
-                    else if (grabbers[i].IsGrabbing)
+                    else
                     {
-                        grabbers[i].ReleaseGrab();
-                    }
-                    else if (TeleportationStarted[i])
-                    {
-						lineDrawers[i].ReleaseFixedEndpoint();
-						TeleportToHandPosition(i);
-						TeleportationStarted[i] = false;
+                        if (grabbers[i].IsRotating)
+                        {
+                            grabbers[i].ReleaseRotation();
+                        }
+                        else if (grabbers[i].IsGrabbing)
+                        {
+                            grabbers[i].ReleaseGrab();
+                        }
+                        else if (TeleportationStarted[i])
+                        {
+                            lineDrawers[i]?.ReleaseFixedEndpoint();
+                            Teleport(i);
+                            TeleportationStarted[i] = false;
+                        }
                     }
                 }
             }
 		}
+    }
+
+    const float g = 9.81f;
+
+    public Vector3[] CalculateArrowTrajectory()
+    {
+        List<Vector3> path = new List<Vector3>();
+
+        hands[bowIndex].GetRootPose(out Pose bowPose);
+        hands[(bowIndex + 1) % 2].GetRootPose(out Pose stringPose);
+        Vector3 bowPosition = bowPose.position;
+        Vector3 stringPosition = stringPose.position;
+
+        Vector3 direction = bowPosition - stringPosition;
+        Vector3 groundDirection = new Vector3(direction.x, 0, direction.z).normalized;
+        float force = direction.magnitude;
+        float v0 = force * force * 100;
+        float h0 = bowPosition.y;
+        float beta = Mathf.Acos(Mathf.Abs(Vector3.Dot(Vector3.up, direction)) / (Vector3.up.magnitude * direction.magnitude));
+
+        float step = 0.25f;
+        float y = h0;
+
+        for (float x = 0; y < h0 - 20; x += step)
+        {
+            y = x * Mathf.Tan(beta) - (g * Mathf.Pow(x, 2)) / (2 * Mathf.Pow(v0, 2) * Mathf.Pow(Mathf.Cos(x), 2)) + h0;
+            path.Add(bowPosition + groundDirection * x + new Vector3(0, y, 0));
+        }
+        
+        return path.ToArray();
     }
 
     void OnTriggerEnter(Collider other)
@@ -137,7 +220,7 @@ public class LocomotionTechnique : MonoBehaviour
     private RaycastHit[] hits = new RaycastHit[20];
     const int rayY = 200;
 
-    private void TeleportToHandPosition(int handIndex)
+    private void Teleport(int handIndex)
     {
         Hand hand = hands[handIndex];
         if (hand.GetRootPose(out Pose handPose) && hmd.GetRootPose(out Pose hmdPose))
@@ -156,17 +239,38 @@ public class LocomotionTechnique : MonoBehaviour
 
             Vector3 newPosition = new Vector3(handPose.position.x, newY, handPose.position.z);
             Quaternion newOrientation = Quaternion.Euler(transform.rotation.eulerAngles.x, newRigRotation, transform.rotation.eulerAngles.z);
-            
-            // collect everything in a straight line from current position to new position
-			Vector3 origin = transform.position + new Vector3(0, 1.5f, 0); // add some height so the ray is able to hit coins
-            bool coinHit = CastRay(origin, newPosition - transform.position);
+
+            // add some height so the ray is able to hit coins
+            Vector3 origin = transform.position + new Vector3(0, 1.5f, 0); 
+            bool coinHit = false;
+            bool terrainHit = false;
+
+            Vector3[] points = LocomotionTechnique.LocomotionType == LocomotionType.Bow ?
+                CalculateArrowTrajectory()
+                : lineDrawers[handIndex]?.GetPoints() ?? Array.Empty<Vector3>();
 
             // collect everything on the path of the curve indicator
-			Vector3[] points = lineDrawers[handIndex]?.GetPoints() ?? Array.Empty<Vector3>();
             for (int i = 0; i < points.Length - 1; i++)
             {
-                coinHit |= CastRay(points[i], points[i + 1] - points[i]);
+                if (LocomotionTechnique.LocomotionType == LocomotionType.Bow)
+                {
+                    if (terrainHit == false)
+                    {
+                        int hitCount = Physics.RaycastNonAlloc(points[i], points[i + 1] - points[i], hits, (points[i + 1] - points[i]).magnitude, LayerMask.GetMask("Terrain"));
+                        for (int j = 0; j < hitCount; j++)
+                        {
+                            newPosition = hits[i].point;
+                            newOrientation = transform.rotation; // dont change rotation
+                            terrainHit = true;
+                        }
+                    }
+                }
+                coinHit |= CastRay(points[i], points[i + 1] - points[i], "locomotion");
             }
+
+            // collect everything in a straight line from current position to new position
+            coinHit |= CastRay(origin, newPosition - transform.position, "locomotion");
+
             if (coinHit)
             {
                 audioSource.Play();
@@ -179,10 +283,11 @@ public class LocomotionTechnique : MonoBehaviour
             Debug.Log("Positioning failed");
         }
     }
-    private bool CastRay(Vector3 origin, Vector3 direction)
+
+    private bool CastRay(Vector3 origin, Vector3 direction, params string[] mask)
     {
         bool coinHit = false;
-        int hitCount = Physics.RaycastNonAlloc(origin, direction, hits, direction.magnitude, LayerMask.GetMask("locomotion"));
+        int hitCount = Physics.RaycastNonAlloc(origin, direction, hits, direction.magnitude, LayerMask.GetMask(mask));
 		for (int i = 0; i < hitCount; i++)
 		{
 			GameObject hitObject = hits[i].collider.gameObject;

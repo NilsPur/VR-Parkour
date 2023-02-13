@@ -4,6 +4,7 @@ using OculusSampleFramework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.PlayerLoop;
@@ -49,32 +50,42 @@ public class ExtendedTrackingToWorldTransformer : MonoBehaviour, ITrackingToWorl
     {
         GetComponent<HmdRef>().GetRootPose(out Pose hmdPose);
         Transform trackingToWorldSpace = Transform;
-        Quaternion hmdRotationY = Quaternion.Euler(new Vector3(0, hmdPose.rotation.eulerAngles.y, 0));
-        Vector3 rootPosition = trackingToWorldSpace.InverseTransformPoint(hmdPose.position + hmdRotationY * rootOffset);
-        float xOffset = pose.position.x - rootPosition.x;
-        float zOffset = pose.position.z - rootPosition.z;
 
-        if (locomotion.grabbers[handIndex].IsGrabbing)
+        if (LocomotionTechnique.LocomotionType == LocomotionType.Bow)
         {
-            a = 0.5f;
+            pose.position = trackingToWorldSpace.TransformPoint(pose.position);
+            pose.rotation = trackingToWorldSpace.rotation * pose.rotation;
+            return pose;
         }
         else
         {
-            a = 2f;
+            Quaternion hmdRotationY = Quaternion.Euler(new Vector3(0, hmdPose.rotation.eulerAngles.y, 0));
+            Vector3 rootPosition = trackingToWorldSpace.InverseTransformPoint(hmdPose.position + hmdRotationY * rootOffset);
+            float xOffset = pose.position.x - rootPosition.x;
+            float zOffset = pose.position.z - rootPosition.z;
+
+            if (locomotion.grabbers[handIndex].IsGrabbing)
+            {
+                a = 0.5f;
+            }
+            else
+            {
+                a = 2f;
+            }
+
+            float newX = (xOffset > 0 ? 1 : (-1)) * a * Mathf.Pow(xOffset * k, 2) + pose.position.x;
+            float newZ = (zOffset > 0 ? 1 : (-1)) * a * Mathf.Pow(zOffset * k, 2) + pose.position.z;
+
+            // get surface height;
+            float newY = pose.position.y;
+            if (Physics.Raycast(trackingToWorldSpace.TransformPoint(new Vector3(newX, rayY, newZ)), Vector3.down, out RaycastHit hit, 2 * rayY, LayerMask.GetMask("Terrain")))
+            {
+                newY += hit.point.y - trackingToWorldSpace.position.y;
+            }
+
+            pose.position = trackingToWorldSpace.TransformPoint(new Vector3(newX, newY, newZ));
+            pose.rotation = trackingToWorldSpace.rotation * pose.rotation;
         }
-
-        float newX = (xOffset > 0 ? 1 : (-1)) * a * Mathf.Pow(xOffset * k, 2) + pose.position.x;
-        float newZ = (zOffset > 0 ? 1 : (-1)) * a * Mathf.Pow(zOffset * k, 2) + pose.position.z;
-
-        // get surface height;
-        float newY = pose.position.y;
-        if (Physics.Raycast(trackingToWorldSpace.TransformPoint(new Vector3(newX, rayY, newZ)), Vector3.down, out RaycastHit hit, 2 * rayY, LayerMask.GetMask("Terrain")))
-        {
-            newY += hit.point.y - trackingToWorldSpace.position.y;
-        }  
-
-        pose.position = trackingToWorldSpace.TransformPoint(new Vector3(newX, newY, newZ));
-        pose.rotation = trackingToWorldSpace.rotation * pose.rotation;
 
         return pose;
     }
