@@ -143,7 +143,7 @@ public class DebugUIBuilder : MonoBehaviour
       ((scene == "DebugUI") ||
        (scene == "DistanceGrab") ||
        (scene == "OVROverlay") ||
-       (scene == "Locomotion")).ToString(),
+       (scene == "LocomotionType")).ToString(),
       "sample_framework");
 #endif
   }
