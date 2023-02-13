@@ -4,7 +4,10 @@ using UnityEngine;
 
 public class Grabber : MonoBehaviour
 {
-    private Quaternion currentRotation;
+    private Vector3 startRotationSelectedObject;
+	private Vector3 startRotationGrabbingObject;
+
+	private Quaternion currentRotation;
     public bool IsRotating { get; private set; }
     public bool CanGrab { get; private set; }
     public bool IsGrabbing { get; set; }
@@ -17,22 +20,31 @@ public class Grabber : MonoBehaviour
 
     public void Update()
     {
-        if (IsRotating)
+        if (SelectedObject == null)
         {
-            if (SelectedObject != null)
-            {
-                Quaternion relativRotation = Quaternion.Inverse(currentRotation) * GrabbingObject.transform.rotation;
-                SelectedObject.transform.parent.transform.rotation *= relativRotation;
-                currentRotation = GrabbingObject.transform.rotation;
-            }
+            IsGrabbing = false;
+            IsRotating = false;
         }
-    }
+        else if (IsRotating)
+        {
+			//Quaternion relativRotation = Quaternion.Inverse(currentRotation) * GrabbingObject.transform.rotation;
+			//SelectedObject.transform.parent.transform.rotation *= relativRotation;
+			//currentRotation = GrabbingObject.transform.rotation;
+			SelectedObject.transform.parent.transform.rotation = Quaternion.Euler(startRotationSelectedObject + (GrabbingObject.transform.rotation.eulerAngles - startRotationGrabbingObject) * 2);
+
+			//SelectedObject.transform.parent.transform.rotation = GrabbingObject.transform.rotation;
+		}
+		else if (IsGrabbing)
+        {
+			SelectedObject.transform.parent.transform.position = GrabbingObject.transform.position;
+		}
+	}
 
     public void Grab()
     {
         if (SelectedObject != null)
         {
-            SelectedObject.transform.parent.transform.parent = GrabbingObject.transform;
+            //SelectedObject.transform.parent.transform.parent = GrabbingObject.transform;
             IsGrabbing = true;
         }
     }
@@ -41,7 +53,7 @@ public class Grabber : MonoBehaviour
     {
         if (SelectedObject != null)
         {
-            SelectedObject.transform.parent.transform.parent = null;
+            //SelectedObject.transform.parent.transform.parent = null;
         }
         IsGrabbing = false;
     }
@@ -50,12 +62,20 @@ public class Grabber : MonoBehaviour
     {
         SelectedObject = selectedObject;
         IsRotating = true;
-        currentRotation = GrabbingObject.transform.rotation;         
-    }
+        currentRotation = GrabbingObject.transform.rotation;
+
+        Debug.LogWarning("Start Hand: " + GrabbingObject.transform.rotation.eulerAngles);
+		Debug.LogWarning("Start T: " + SelectedObject.transform.rotation.eulerAngles);
+		SelectedObject.transform.parent.transform.rotation = GrabbingObject.transform.rotation;
+		startRotationGrabbingObject = GrabbingObject.transform.rotation.eulerAngles;
+        startRotationSelectedObject = SelectedObject.transform.parent.transform.rotation.eulerAngles;
+	}
 
     public void ReleaseRotation()
     {
-        SelectedObject = null;
+		Debug.LogWarning("End Hand: " + GrabbingObject.transform.rotation.eulerAngles);
+		Debug.LogWarning("End T: " + SelectedObject.transform.rotation.eulerAngles);
+		SelectedObject = null;
         IsRotating = false;
     }
 
@@ -78,8 +98,11 @@ public class Grabber : MonoBehaviour
             }
             else if (other.gameObject.CompareTag("done"))
             {
-                selectionTaskMeasure.isTaskStart = false;
-                selectionTaskMeasure.EndOneTask();
+                if (selectionTaskMeasure.taskTime > 1)
+                {
+					selectionTaskMeasure.isTaskStart = false;
+					selectionTaskMeasure.EndOneTask();
+				}
             }
         }
     }

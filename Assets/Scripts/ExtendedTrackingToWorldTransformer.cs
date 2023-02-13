@@ -54,13 +54,13 @@ public class ExtendedTrackingToWorldTransformer : MonoBehaviour, ITrackingToWorl
         float xOffset = pose.position.x - rootPosition.x;
         float zOffset = pose.position.z - rootPosition.z;
 
-        if (locomotion.grabbers[handIndex].IsGrabbing)
+        if (locomotion.selectionTaskMeasure.isTaskStart)
         {
-            a = 0.5f;
+            a = 1.2f;
         }
         else
         {
-            a = 2f;
+            a = 2.5f;
         }
 
         float newX = (xOffset > 0 ? 1 : (-1)) * a * Mathf.Pow(xOffset * k, 2) + pose.position.x;

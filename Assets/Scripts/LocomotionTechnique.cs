@@ -53,30 +53,33 @@ public class LocomotionTechnique : MonoBehaviour
     {        
 		for (int i = 0; i < hands.Length; i++)
         {
-            if (hands[i].IsHighConfidence)
-            {
+            //if (hands[i].IsHighConfidence)
+            //{
                 if (hands[i].GetFingerIsPinching(HandFinger.Index))
                 {
-                    if (grabbers[(i + 1) % 2].IsGrabbing)
+                    if (!grabbers[i].IsGrabbing)
                     {
-                        if (!grabbers[i].IsRotating)
-                        {
-                            grabbers[i].Rotate(grabbers[(i + 1) % 2].SelectedObject);
-                        }
-                    }
-                    else if (grabbers[i].CanGrab)
-                    {
-                        if (!grabbers[i].IsGrabbing)
-                        {
-                            grabbers[i].Grab();
-                        }
-                    }
-                    else if (!TeleportationStarted[i])
-                    {
-                        hands[i].GetRootPose(out Pose handPose);
-						lineDrawers[i]?.FixateEndPoint(handPose.position);
-						TeleportationStarted[i] = true;
-                    }
+						if (grabbers[(i + 1) % 2].IsGrabbing)
+						{
+							if (!grabbers[i].IsRotating)
+							{
+								grabbers[i].Rotate(grabbers[(i + 1) % 2].SelectedObject);
+							}
+						}
+						else if (grabbers[i].CanGrab)
+						{
+							if (!grabbers[i].IsGrabbing)
+							{
+								grabbers[i].Grab();
+							}
+						}
+						else if (!TeleportationStarted[i])
+						{
+							hands[i].GetRootPose(out Pose handPose);
+							lineDrawers[i]?.FixateEndPoint(handPose.position);
+							TeleportationStarted[i] = true;
+						}
+					}
                 }
                 else
                 {
@@ -90,12 +93,12 @@ public class LocomotionTechnique : MonoBehaviour
                     }
                     else if (TeleportationStarted[i])
                     {
-						lineDrawers[i].ReleaseFixedEndpoint();
+						lineDrawers[i]?.ReleaseFixedEndpoint();
 						TeleportToHandPosition(i);
 						TeleportationStarted[i] = false;
                     }
                 }
-            }
+            //}
 		}
     }
 
@@ -142,11 +145,7 @@ public class LocomotionTechnique : MonoBehaviour
         Hand hand = hands[handIndex];
         if (hand.GetRootPose(out Pose handPose) && hmd.GetRootPose(out Pose hmdPose))
         {
-            float newRigRotation = (360 + transform.InverseTransformDirection(0, handPose.rotation.eulerAngles.y, 0).y - 90 - hmdPose.rotation.eulerAngles.y) % 360;
-            //Debug.LogWarning("hand rotation: " + handPose.rotation.eulerAngles);
-            //Debug.LogWarning("hmd rotation: " + hmdPose.rotation.eulerAngles);
-            //Debug.LogWarning("camera rig rotation: " + transform.rotation.eulerAngles);
-            //Debug.LogWarning("new camera rig rotation: " + newRigRotation);
+            //float newRigRotation = (360 + transform.InverseTransformDirection(0, handPose.rotation.eulerAngles.y, 0).y - 90 - hmdPose.rotation.eulerAngles.y) % 360;
 
             float newY = transform.position.y;
             if (Physics.Raycast(handPose.position + rayY * Vector3.up, Vector3.down, out RaycastHit hit, 2 * rayY, LayerMask.GetMask("Terrain")))
@@ -155,7 +154,7 @@ public class LocomotionTechnique : MonoBehaviour
             }
 
             Vector3 newPosition = new Vector3(handPose.position.x, newY, handPose.position.z);
-            Quaternion newOrientation = Quaternion.Euler(transform.rotation.eulerAngles.x, newRigRotation, transform.rotation.eulerAngles.z);
+            //Quaternion newOrientation = Quaternion.Euler(transform.rotation.eulerAngles.x, newRigRotation, transform.rotation.eulerAngles.z);
             
             // collect everything in a straight line from current position to new position
 			Vector3 origin = transform.position + new Vector3(0, 1.5f, 0); // add some height so the ray is able to hit coins
@@ -172,9 +171,10 @@ public class LocomotionTechnique : MonoBehaviour
                 audioSource.Play();
             }
 
-            transform.SetPositionAndRotation(newPosition, newOrientation);
-        }
-        else
+			//transform.SetPositionAndRotation(newPosition, newOrientation);
+			transform.position = newPosition;
+		}
+		else
         {
             Debug.Log("Positioning failed");
         }
