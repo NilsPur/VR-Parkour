@@ -4,10 +4,7 @@ using UnityEngine;
 
 public class Grabber : MonoBehaviour
 {
-    private Vector3 startRotationSelectedObject;
-	private Vector3 startRotationGrabbingObject;
-
-	private Quaternion currentRotation;
+	private Quaternion lastGrabberRotation;
     public bool IsRotating { get; private set; }
     public bool CanGrab { get; private set; }
     public bool IsGrabbing { get; set; }
@@ -27,13 +24,12 @@ public class Grabber : MonoBehaviour
         }
         else if (IsRotating)
         {
-			//Quaternion relativRotation = Quaternion.Inverse(currentRotation) * GrabbingObject.transform.rotation;
-			//SelectedObject.transform.parent.transform.rotation *= relativRotation;
-			//currentRotation = GrabbingObject.transform.rotation;
-			SelectedObject.transform.parent.transform.rotation = Quaternion.Euler(startRotationSelectedObject + (GrabbingObject.transform.rotation.eulerAngles - startRotationGrabbingObject) * 2);
-
-			//SelectedObject.transform.parent.transform.rotation = GrabbingObject.transform.rotation;
-		}
+            Quaternion currentRotationOffset = Quaternion.Inverse(lastGrabberRotation) * GrabbingObject.transform.rotation;
+            Vector3 rotationAngle = currentRotationOffset.eulerAngles;
+            rotationAngle = new Vector3(rotationAngle.z, rotationAngle.x, rotationAngle.y); // hand rotation needs to be mapped
+            SelectedObject.transform.parent.transform.Rotate(rotationAngle, Space.World);
+            lastGrabberRotation = GrabbingObject.transform.rotation;
+        }
 		else if (IsGrabbing)
         {
 			SelectedObject.transform.parent.transform.position = GrabbingObject.transform.position;
@@ -62,19 +58,15 @@ public class Grabber : MonoBehaviour
     {
         SelectedObject = selectedObject;
         IsRotating = true;
-        currentRotation = GrabbingObject.transform.rotation;
-
+        lastGrabberRotation = GrabbingObject.transform.rotation;
         Debug.LogWarning("Start Hand: " + GrabbingObject.transform.rotation.eulerAngles);
-		Debug.LogWarning("Start T: " + SelectedObject.transform.rotation.eulerAngles);
-		SelectedObject.transform.parent.transform.rotation = GrabbingObject.transform.rotation;
-		startRotationGrabbingObject = GrabbingObject.transform.rotation.eulerAngles;
-        startRotationSelectedObject = SelectedObject.transform.parent.transform.rotation.eulerAngles;
+		Debug.LogWarning("Start T: " + SelectedObject.transform.parent.transform.rotation.eulerAngles);
 	}
 
     public void ReleaseRotation()
     {
 		Debug.LogWarning("End Hand: " + GrabbingObject.transform.rotation.eulerAngles);
-		Debug.LogWarning("End T: " + SelectedObject.transform.rotation.eulerAngles);
+		Debug.LogWarning("End T: " + SelectedObject.transform.parent.transform.rotation.eulerAngles);
 		SelectedObject = null;
         IsRotating = false;
     }

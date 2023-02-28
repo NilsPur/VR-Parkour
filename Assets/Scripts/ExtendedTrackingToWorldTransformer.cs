@@ -68,10 +68,10 @@ public class ExtendedTrackingToWorldTransformer : MonoBehaviour, ITrackingToWorl
 
         // get surface height;
         float newY = pose.position.y;
-        if (Physics.Raycast(trackingToWorldSpace.TransformPoint(new Vector3(newX, rayY, newZ)), Vector3.down, out RaycastHit hit, 2 * rayY, LayerMask.GetMask("Terrain")))
+        if (Physics.Raycast(trackingToWorldSpace.TransformPoint(new Vector3(newX, rayY, newZ)), Vector3.down, out RaycastHit hit, 2 * rayY, LayerMask.GetMask("Terrain"))) 
         {
             newY += hit.point.y - trackingToWorldSpace.position.y;
-        }  
+        }
 
         pose.position = trackingToWorldSpace.TransformPoint(new Vector3(newX, newY, newZ));
         pose.rotation = trackingToWorldSpace.rotation * pose.rotation;
