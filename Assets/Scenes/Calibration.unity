@@ -773,7 +773,8 @@ PrefabInstance:
       propertyPath: m_text
       value: Hold both of your hands near your body in comfortable height in a resting
         position. Then form a thumps up gesture with either one of your hands while
-        still holding your hands at this position.
+        still holding your hands at this position. Keep your head in a neutral position.
+        It is not necessary to look down.
       objectReference: {fileID: 0}
     - target: {fileID: 2159511289741923712, guid: 5a7d1597f08805e4183309c0e2092779,
         type: 3}
@@ -793,7 +794,7 @@ PrefabInstance:
     - target: {fileID: 2159511289741923712, guid: 5a7d1597f08805e4183309c0e2092779,
         type: 3}
       propertyPath: m_margin.z
-      value: 14.913349
+      value: -20.366604
       objectReference: {fileID: 0}
     - target: {fileID: 2159511289741923712, guid: 5a7d1597f08805e4183309c0e2092779,
         type: 3}
