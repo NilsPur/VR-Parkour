@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 [RequireComponent(typeof(LineRenderer))]
 public class LineDrawer : MonoBehaviour
@@ -36,7 +37,9 @@ public class LineDrawer : MonoBehaviour
         {
             if (drawArrowTrajectory)
             {
-                
+                Vector3[] positions = locomotion.CalculateArrowTrajectory();
+                lineRenderer.positionCount = positions.Length;
+                lineRenderer.SetPositions(positions);
             }
         }
         else

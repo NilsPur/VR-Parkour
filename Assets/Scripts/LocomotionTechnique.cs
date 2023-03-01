@@ -115,15 +115,10 @@ public class LocomotionTechnique : MonoBehaviour
                         // Bow was drawn
                         if (TeleportationStarted[i] && TeleportationStarted[(i + 1) % 2])
                         {
-                            // Was the bow released? -> cancel shot
+                            TeleportationStarted[i] = false;
+
+                            // The bowstring was released -> execute shot
                             if (i == bowIndex)
-                            {
-                                TeleportationStarted[i] = false;
-                                // The other hand is now the bow
-                                // bowIndex = (i + 1) % 2;
-                            }
-                            // The bowstring was release -> execute shot
-                            else
                             {
                                 Teleport(i);
                             }
@@ -163,19 +158,22 @@ public class LocomotionTechnique : MonoBehaviour
         Vector3 bowPosition = bowPose.position;
         Vector3 stringPosition = stringPose.position;
 
+        Debug.LogWarning(bowPosition);
+        Debug.LogWarning(stringPosition);
+
         Vector3 direction = bowPosition - stringPosition;
         Vector3 groundDirection = new Vector3(direction.x, 0, direction.z).normalized;
         float force = direction.magnitude;
         float v0 = force * force * 100;
         float h0 = bowPosition.y;
-        float beta = Mathf.Acos(Mathf.Abs(Vector3.Dot(Vector3.up, direction)) / (Vector3.up.magnitude * direction.magnitude));
+        float beta = Mathf.Atan2(direction.x, direction.z);
 
-        float step = 0.25f;
+        float step = 0.05f;
         float y = h0;
 
-        for (float x = 0; y < h0 - 20; x += step)
+        for (float x = 0; y > h0 - 20; x += step)
         {
-            y = x * Mathf.Tan(beta) - (g * Mathf.Pow(x, 2)) / (2 * Mathf.Pow(v0, 2) * Mathf.Pow(Mathf.Cos(x), 2)) + h0;
+            y = x * Mathf.Tan(beta) - (g * Mathf.Pow(x, 2)) / (2 * Mathf.Pow(v0, 2) * Mathf.Pow(Mathf.Cos(beta), 2));
             path.Add(bowPosition + groundDirection * x + new Vector3(0, y, 0));
         }
         
@@ -245,7 +243,7 @@ public class LocomotionTechnique : MonoBehaviour
             bool coinHit = false;
             bool terrainHit = false;
 
-            Vector3[] points = LocomotionTechnique.LocomotionType == LocomotionType.Bow ?
+            Vector3[] points = LocomotionType == LocomotionType.Bow ?
                 CalculateArrowTrajectory()
                 : lineDrawers[handIndex]?.GetPoints() ?? Array.Empty<Vector3>();
 
@@ -259,7 +257,7 @@ public class LocomotionTechnique : MonoBehaviour
                         int hitCount = Physics.RaycastNonAlloc(points[i], points[i + 1] - points[i], hits, (points[i + 1] - points[i]).magnitude, LayerMask.GetMask("Terrain"));
                         for (int j = 0; j < hitCount; j++)
                         {
-                            newPosition = hits[i].point;
+                            newPosition = hits[j].point;
                             newOrientation = transform.rotation; // dont change rotation
                             terrainHit = true;
                         }
